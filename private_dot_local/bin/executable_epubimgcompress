@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# Check if an argument is provided
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <basename>"
+  exit 1
+fi
+
+BASENAME=$1
+COUNT=1
+
+# Create a temporary directory for processing
+TMP_DIR=$(mktemp -d)
+
+# Process all image files in the current folder, sorted by modification date (oldest first)
+ls -1tr | while IFS= read -r FILE; do
+  # Make sure we skip directories or empty lines
+  [ -z "$FILE" ] && continue
+  [ -d "$FILE" ] && continue
+  
+  # Check if the file is an image
+  if file --mime-type "$FILE" | grep -qE 'image|bitmap'; then
+    # Determine output filename
+    OUTPUT_FILE="$TMP_DIR/${BASENAME}${COUNT}.jpg"
+
+    # Convert and compress the image to half its size or more
+    magick "$FILE" -quality 50 "$OUTPUT_FILE"
+
+    # Rename the temporary output file to the final name
+    mv "$OUTPUT_FILE" "${BASENAME}${COUNT}.jpg"
+
+    # Remove the original file
+    rm "$FILE"
+
+    # Increment the counter
+    COUNT=$((COUNT + 1))
+  fi
+done
+
+# Cleanup temporary directory
+rmdir "$TMP_DIR"
+
+echo "Processing completed!"

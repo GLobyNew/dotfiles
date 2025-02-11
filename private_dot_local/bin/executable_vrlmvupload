@@ -1,0 +1,45 @@
+#!/bin/bash
+
+USAGE="Usage: $0 'folder name'"
+
+if [ "$#" != 1 ]; then
+        echo "$USAGE"
+        exit 1
+fi
+
+# Define the folder name
+folderName="$1"
+
+# Get the current directory
+currentDir=$(pwd)
+
+# Initialize the CSV file
+csvFile="$currentDir/file_info.csv"
+echo "OldName,NewUUID,URL" > "$csvFile"
+
+# Loop through all image files in the directory
+for file in *.{jpg,JPG,avif,AVIF,jpeg,JPEG,heic,HEIC,png,PNG,bmp,BMP,gif,GIF,webp,WEBP}; do
+    # Check if the file exists (handle globbing case)
+    [[ -e "$file" ]] || continue
+
+    # Generate a new UUID and set the new file name
+    newUUID=$(uuidgen)
+    newFileName="$newUUID.jpg"
+    newFilePath="$currentDir/$newFileName"
+
+    # Convert and optimize the image to .jpg using ImageMagick
+    magick "$file" -quality 75 "$newFilePath"
+
+    # Construct the URL
+    url="https://img.varlamov.me/$folderName/$newFileName"
+    
+    
+    # Append the file info to the CSV
+    echo "${file//,/},$newFileName,$url" >> "$csvFile"
+
+    # Delete the original file after conversion
+    rm "$file"
+done
+
+echo "CSV file created, files optimized, converted to JPG, originals deleted, and renamed successfully."
+
