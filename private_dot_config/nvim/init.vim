@@ -1,6 +1,7 @@
 " Basic settings
 syntax on
 filetype plugin indent on
+set clipboard=unnamedplus
 set relativenumber
 set termguicolors
 " Go-specific indentation (Go uses tabs; you can adjust as desired)
