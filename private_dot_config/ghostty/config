@@ -1,0 +1,5 @@
+#theme = catppuccin-mocha
+theme = "0x96f"
+font-family = "Ubuntu Mono"
+font-size = 20
+shell-integration-features = sudo
